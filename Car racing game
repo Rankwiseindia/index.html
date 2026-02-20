@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Car Racing</title>
+<style>
+body{
+  margin:0;
+  background:#111;
+  overflow:hidden;
+  font-family:Arial;
+  color:white;
+  text-align:center;
+}
+canvas{
+  background:#333;
+  display:block;
+  margin:auto;
+}
+#ui{
+  position:absolute;
+  top:10px;
+  left:10px;
+  text-align:left;
+}
+button{
+  padding:8px 15px;
+  margin-top:5px;
+  cursor:pointer;
+}
+#controls{
+  position:absolute;
+  bottom:20px;
+  width:100%;
+}
+.controlBtn{
+  width:80px;
+  height:80px;
+  font-size:30px;
+  margin:10px;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <div>Score: <span id="score">0</span></div>
+  <div>High Score: <span id="highScore">0</span></div>
+  <div>Lives: <span id="lives">3</span></div>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+
+<div id="controls">
+  <button class="controlBtn" onclick="moveLeft()">⬅</button>
+  <button class="controlBtn" onclick="activateNitro()">🔥</button>
+  <button class="controlBtn" onclick="moveRight()">➡</button>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let car, obstacles, score, lives, speed, gameRunning;
+let highScore = localStorage.getItem("highScore") || 0;
+document.getElementById("highScore").innerText = highScore;
+
+function startGame(){
+  car = {x:180,y:500,width:40,height:70};
+  obstacles = [];
+  score = 0;
+  lives = 3;
+  speed = 4;
+  gameRunning = true;
+
+  document.getElementById("score").innerText = score;
+  document.getElementById("lives").innerText = lives;
+
+  update();
+  setInterval(createObstacle,1500);
+}
+
+function drawCar(){
+  ctx.fillStyle="red";
+  ctx.fillRect(car.x, car.y, car.width, car.height);
+}
+
+function createObstacle(){
+  if(!gameRunning) return;
+  let x = Math.random()*(canvas.width-40);
+  obstacles.push({x:x,y:-80,width:40,height:70});
+}
+
+function drawObstacles(){
+  ctx.fillStyle="yellow";
+  obstacles.forEach(obs=>{
+    ctx.fillRect(obs.x,obs.y,obs.width,obs.height);
+  });
+}
+
+function moveObstacles(){
+  obstacles.forEach(obs=>{
+    obs.y += speed;
+
+    if(obs.y > canvas.height){
+      score++;
+      speed += 0.1;
+      document.getElementById("score").innerText = score;
+      obs.y = -80;
+      obs.x = Math.random()*(canvas.width-40);
+    }
+
+    if(
+      car.x < obs.x + obs.width &&
+      car.x + car.width > obs.x &&
+      car.y < obs.y + obs.height &&
+      car.y + car.height > obs.y
+    ){
+      lives--;
+      document.getElementById("lives").innerText = lives;
+      obs.y = -80;
+      obs.x = Math.random()*(canvas.width-40);
+
+      if(lives <= 0){
+        endGame();
+      }
+    }
+  });
+}
+
+function update(){
+  if(!gameRunning) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawCar();
+  drawObstacles();
+  moveObstacles();
+  requestAnimationFrame(update);
+}
+
+function endGame(){
+  gameRunning = false;
+  if(score > highScore){
+    localStorage.setItem("highScore",score);
+  }
+  alert("Game Over! Score: "+score);
+  location.reload();
+}
+
+function moveLeft(){
+  if(car.x > 0) car.x -= 30;
+}
+
+function moveRight(){
+  if(car.x < canvas.width - car.width) car.x += 30;
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.key==="ArrowLeft") moveLeft();
+  if(e.key==="ArrowRight") moveRight();
+  if(e.key===" ") activateNitro();
+});
+
+function activateNitro(){
+  speed += 5;
+  setTimeout(()=>{ speed -= 5; },2000);
+}
+</script>
+
+</body>
+</html>
