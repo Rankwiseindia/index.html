@@ -47,7 +47,7 @@
         </select>
 
         <label for="topic" class="form-label">टॉपिक (ऑप्शनल):</label>
-        <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग, भारतीय इतिहास">
+        <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग">
 
         <label for="level" class="form-label">कठिनाई स्तर:</label>
         <select id="level" class="form-select mb-4">
@@ -72,7 +72,7 @@
 
   <footer>
     <p>Created by Naveen from Nagla Ugrasen, Post Kuchesar, District Bulandshahr, Uttar Pradesh. This is an AI-powered platform for unlimited objective quizzes in Hindi for GS, Reasoning, Hindi, and Math.</p>
-    <p class="exam-list">हम SSC CGL, SSC CHSL, SSC MTS, SSC GD Constable, SSC CPO, Delhi Police Constable, Delhi Police Head Constable, RRB NTPC, RRB Group D, RRB ALP, RRB JE, IBPS PO/Clerk, SBI PO/Clerk, RPF Constable/SI, UPSC CDS/NDA और अन्य प्रमुख सरकारी भर्तियों/परीक्षाओं के लिए प्रैक्टिस क्विज प्रदान करते हैं।</p>
+    <p class="exam-list">हम SSC CGL, SSC CHSL, SSC MTS, SSC GD Constable, SSC CPO, Delhi Police Constable, Delhi Police Head Constable, RRB NTPC, RRB Group D, RRB ALP, RRB JE, IBPS PO/Clerk, SBI PO/Clerk, RPF Constable/SI, UPSC CDS/NDA और अन्य प्रमुख सरकारी भर्तियों के लिए प्रैक्टिस क्विज प्रदान करते हैं।</p>
     <p>For queries, contact: [अपना ईमेल डालें या हटाएं]। © 2026 RankWise India.</p>
   </footer>
 
@@ -97,7 +97,7 @@
       const topic = document.getElementById('topic').value.trim() || 'सामान्य';
       const level = document.getElementById('level').value;
 
-      const apiKey = 'AIzaSyAdhg2D0pGHxULQhnNPigW2Ozm-kbVse88'; // ← तुम्हारी नई की डाली हुई है
+      const apiKey = 'AIzaSyDbXBYR8DrWwTEKjfaxSDfuzyC5pNfGTs8'; // ← तुम्हारी लेटेस्ट API key यहाँ डाली गई है
 
       const prompt = `
 तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।
@@ -168,9 +168,9 @@
         questionsDiv.innerHTML = `<div class="alert alert-danger">
           <strong>एरर:</strong> ${error.message}<br>
           <small>संभावित फिक्स:<br>
-          1. नई API key लें (aistudio.google.com)<br>
-          2. मॉडल नाम बदलकर ऊपर कमेंट में दिए नाम ट्राई करें<br>
-          3. अगर "leaked" या "permission denied" आए तो नया की बनाओ</small>
+          1. अगर "leaked" या "permission denied" आए तो नया API key बनाओ (aistudio.google.com)<br>
+          2. मॉडल नाम बदलकर ट्राई करो: ऊपर कमेंट में दिए नाम<br>
+          3. की सही कॉपी की है? कोई स्पेस/एक्स्ट्रा कैरेक्टर नहीं होना चाहिए</small>
         </div>`;
       }
 
@@ -180,9 +180,7 @@
 
     function highlightAnswer(input, correct, qIndex, selectedValue) {
       const labels = document.querySelectorAll(`input[name="q${qIndex}"] \~ label`);
-      labels.forEach(label => {
-        label.classList.remove('correct-answer', 'wrong-answer');
-      });
+      labels.forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
 
       if (selectedValue === correct) {
         input.nextElementSibling.classList.add('correct-answer');
