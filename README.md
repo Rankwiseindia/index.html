@@ -21,89 +21,27 @@
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    h1 {
-      text-align: center;
-      color: #0277bd;
-      margin-bottom: 10px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #555;
-      margin-bottom: 30px;
-    }
-    label {
-      display: block;
-      margin: 15px 0 5px;
-      font-weight: bold;
-      color: #444;
-    }
+    h1 { text-align: center; color: #0277bd; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: #555; margin-bottom: 30px; }
+    label { display: block; margin: 15px 0 5px; font-weight: bold; color: #444; }
     select, input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-      box-sizing: border-box;
+      width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box;
     }
     button {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 18px;
-      cursor: pointer;
-      margin: 25px 0 15px;
-      transition: background 0.3s;
+      display: block; width: 100%; padding: 14px; background: #4CAF50; color: white; border: none;
+      border-radius: 6px; font-size: 18px; cursor: pointer; margin: 25px 0 15px; transition: background 0.3s;
     }
-    button:hover {
-      background: #43A047;
-    }
-    button:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-    #loading {
-      text-align: center;
-      font-size: 18px;
-      color: #0277bd;
-      margin: 20px 0;
-      display: none;
-    }
-    #questions {
-      margin-top: 30px;
-    }
+    button:hover { background: #43A047; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    #loading { text-align: center; font-size: 18px; color: #0277bd; margin: 20px 0; display: none; }
+    #questions { margin-top: 30px; }
     .question {
-      background: #f9f9f9;
-      padding: 18px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      border-left: 5px solid #4CAF50;
+      background: #f9f9f9; padding: 18px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #4CAF50;
     }
-    .question h3 {
-      margin-top: 0;
-      color: #d32f2f;
-    }
-    .options {
-      margin: 10px 0;
-    }
-    .correct {
-      font-weight: bold;
-      color: #2e7d32;
-      margin-top: 10px;
-    }
-    .explanation {
-      background: #e8f5e9;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 10px;
-    }
-    @media (max-width: 600px) {
-      .container { padding: 15px; }
-      button { font-size: 16px; }
-    }
+    .question h3 { margin-top: 0; color: #d32f2f; }
+    .correct { font-weight: bold; color: #2e7d32; margin-top: 10px; }
+    .explanation { background: #e8f5e9; padding: 10px; border-radius: 6px; margin-top: 10px; }
+    @media (max-width: 600px) { .container { padding: 15px; } button { font-size: 16px; } }
   </style>
 </head>
 <body>
@@ -132,7 +70,7 @@
 
     <button id="generateBtn" onclick="generateQuiz()">10 प्रश्न जनरेट करें</button>
 
-    <div id="loading">प्रश्न बन रहे हैं... कृपया 5-15 सेकंड इंतजार करें</div>
+    <div id="loading">प्रश्न बन रहे हैं... कृपया 5-20 सेकंड इंतजार करें</div>
 
     <div id="questions"></div>
   </div>
@@ -174,7 +112,7 @@
 
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -185,35 +123,36 @@
         );
 
         if (!response.ok) {
-          throw new Error('API से समस्या: ' + response.status);
+          const errText = await response.text();
+          throw new Error('API एरर: ' + response.status + ' - ' + errText);
         }
 
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'कोई जवाब नहीं मिला';
 
-        // टेक्स्ट को HTML में बदलकर दिखाओ
         const formatted = text
           .replace(/\n/g, '<br>')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           .replace(/सही उत्तर:/g, '<div class="correct">सही उत्तर:</div>')
           .replace(/स्पष्टीकरण:/g, '<div class="explanation">स्पष्टीकरण:</div>');
 
-        const questionBlocks = formatted.split(/प्रश्न \d+/).filter(Boolean);
-        let html = '';
+        let html = '<h2>जनरेटेड प्रश्न:</h2>';
+        const lines = formatted.split('\n').filter(line => line.trim());
+        let currentQuestion = '';
 
-        questionBlocks.forEach((block, i) => {
-          if (block.trim()) {
-            html += `<div class="question">
-              <h3>प्रश्न ${i + 1}</h3>
-              ${block.trim()}
-            </div>`;
+        lines.forEach(line => {
+          if (line.startsWith('प्रश्न')) {
+            if (currentQuestion) html += `<div class="question">${currentQuestion}</div>`;
+            currentQuestion = `<h3>${line}</h3>`;
+          } else {
+            currentQuestion += `<p>${line}</p>`;
           }
         });
+        if (currentQuestion) html += `<div class="question">${currentQuestion}</div>`;
 
-        questionsDiv.innerHTML = html || '<p style="color:red;">प्रश्न लोड करने में समस्या आई। बाद में ट्राई करें।</p>';
+        questionsDiv.innerHTML = html || '<p style="color:red;">प्रश्न लोड करने में समस्या।</p>';
 
       } catch (error) {
-        questionsDiv.innerHTML = `<p style="color:red;">एरर: ${error.message}<br>API की चेक करें या कल ट्राई करें (फ्री लिमिट हो सकती है)।</p>`;
+        questionsDiv.innerHTML = `<p style="color:red;">एरर: ${error.message}<br>संभावित वजह: मॉडल पुराना हो गया या API लिमिट/की इश्यू। कल ट्राई करें या नया की लें।</p>`;
         console.error(error);
       }
 
