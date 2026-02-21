@@ -13,9 +13,9 @@
     .btn-primary { background: #28a745; border: none; }
     .btn-primary:hover { background: #218838; }
     .quiz-card { margin-bottom: 25px; border-left: 6px solid #28a745; border-radius: 10px; }
-    .option-label { cursor: pointer; padding: 8px 0; }
-    .correct-answer { color: #28a745 !important; font-weight: bold; }
-    .wrong-answer { color: #dc3545 !important; }
+    .option-label { cursor: pointer; padding: 8px 0; display: block; }
+    .correct-answer { color: #28a745 !important; font-weight: bold; background: #e9f7ef; padding: 5px; border-radius: 5px; }
+    .wrong-answer { color: #dc3545 !important; font-weight: bold; background: #f8d7da; padding: 5px; border-radius: 5px; }
     .explanation { background: #e9f7ef; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.95em; }
     #score { text-align: center; font-size: 1.6em; margin-top: 25px; }
     #loading { text-align: center; color: #007bff; font-size: 1.3em; display: none; margin: 20px 0; }
@@ -93,7 +93,7 @@
       const topic = document.getElementById('topic').value.trim() || 'सामान्य';
       const level = document.getElementById('level').value;
 
-      const apiKey = 'AIzaSyA8cvIS2eucpZGVe4-WlAcO-7GaeXGmH9k'; // ← अगर 403 आए तो नया की डालो
+      const apiKey = 'AIzaSyA8cvIS2eucpZGVe4-WlAcO-7GaeXGmH9k'; // ← नया की डालो अगर पुरानी काम न करे
 
       const prompt = `
 तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।
@@ -115,7 +115,10 @@
 
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          // अगर 404 आए तो ये ट्राई करो:
+          // `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`
+          // या `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${apiKey}`
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -145,7 +148,7 @@
               <h5 class="card-title">प्रश्न ${i + 1}: ${q.question}</h5>
               ${q.options.map((opt, j) => `
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}">
+                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}" onchange="highlightAnswer(this, '${q.correct}', ${i}, ${j})">
                   <label class="form-check-label option-label" for="q\( {i}_ \){j}">${opt}</label>
                 </div>
               `).join('')}
@@ -158,11 +161,26 @@
         submitBtn.style.display = 'block';
 
       } catch (error) {
-        questionsDiv.innerHTML = `<div class="alert alert-danger">एरर: ${error.message}<br>संभावित फिक्स: नया API key लें (aistudio.google.com) या मॉडल नाम बदलकर gemini-1.5-flash-latest ट्राई करें।</div>`;
+        questionsDiv.innerHTML = `<div class="alert alert-danger">एरर: ${error.message}<br>संभावित फिक्स: नया API key लें (aistudio.google.com) या ऊपर कमेंट में दिए मॉडल नाम ट्राई करें।</div>`;
       }
 
       btn.disabled = false;
       loading.style.display = 'none';
+    }
+
+    // ऑप्शन सिलेक्ट करने पर तुरंत राइट/रॉन्ग हाइलाइट
+    function highlightAnswer(input, correct, qIndex, optIndex) {
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] \~ label`);
+      labels.forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
+
+      if (input.value === correct) {
+        input.nextElementSibling.classList.add('correct-answer');
+      } else {
+        input.nextElementSibling.classList.add('wrong-answer');
+        // सही वाला भी हाइलाइट करो
+        const correctInput = document.querySelector(`input[name="q\( {qIndex}"][value=" \){correct}"]`);
+        if (correctInput) correctInput.nextElementSibling.classList.add('correct-answer');
+      }
     }
 
     function submitQuiz() {
@@ -177,11 +195,9 @@
 
         if (selected && selected.value === q.correct) {
           score++;
-          selected.nextElementSibling.classList.add('correct-answer');
-        } else if (selected) {
-          selected.nextElementSibling.classList.add('wrong-answer');
         }
 
+        // सही ऑप्शन हमेशा हाइलाइट रहे
         const correctOpt = document.querySelector(`input[value="\( {q.correct}"][name="q \){i}"]`);
         if (correctOpt) correctOpt.nextElementSibling.classList.add('correct-answer');
       });
