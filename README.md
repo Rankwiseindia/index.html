@@ -6,69 +6,73 @@
   <title>RankWise India - AI Quiz Generator</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <style>
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(to bottom, #f0f8ff, #ffffff); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
-    .header { background: #007bff; color: white; padding: 25px; text-align: center; border-bottom: 5px solid #0056b3; }
-    .container { max-width: 950px; margin: 25px auto; padding: 25px; background: white; border-radius: 15px; box-shadow: 0 6px 30px rgba(0,0,0,0.12); }
-    .form-control, .btn { border-radius: 10px; }
-    .btn-primary { background: #28a745; border: none; }
-    .btn-primary:hover { background: #218838; }
-    .quiz-card { margin-bottom: 25px; border-left: 6px solid #28a745; border-radius: 10px; }
-    .option-label { cursor: pointer; padding: 8px 0; display: block; }
-    .correct-answer { color: #28a745 !important; font-weight: bold; background: #e9f7ef; padding: 5px; border-radius: 5px; }
-    .wrong-answer { color: #dc3545 !important; font-weight: bold; background: #f8d7da; padding: 5px; border-radius: 5px; }
-    .explanation { background: #e9f7ef; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.95em; }
-    #score { text-align: center; font-size: 1.6em; margin-top: 25px; }
-    #loading { text-align: center; color: #007bff; font-size: 1.3em; display: none; margin: 20px 0; }
-    footer { margin-top: auto; background: #f8f9fa; padding: 25px; text-align: center; border-top: 1px solid #dee2e6; font-size: 0.95em; color: #495057; }
-    .progress { height: 25px; margin-top: 15px; }
-    .exam-list { font-size: 0.9em; margin-top: 10px; color: #6c757d; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(to bottom, #f0f8ff, #ffffff); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { background: #007bff; color: white; padding: 30px 15px; text-align: center; border-bottom: 6px solid #0056b3; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .container { max-width: 980px; margin: 30px auto; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 8px 35px rgba(0,0,0,0.12); }
+    .form-label { font-weight: 600; margin-bottom: 8px; color: #333; }
+    .form-select, .form-control { border-radius: 10px; padding: 12px; font-size: 1rem; }
+    .btn-primary { background: #28a745; border: none; font-size: 1.2rem; padding: 14px; border-radius: 10px; transition: all 0.3s; }
+    .btn-primary:hover { background: #218838; transform: translateY(-2px); }
+    .quiz-card { margin-bottom: 28px; border-left: 7px solid #28a745; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 15px rgba(0,0,0,0.08); }
+    .quiz-card .card-body { padding: 22px; }
+    .option-label { cursor: pointer; padding: 10px 15px; display: block; margin: 8px 0; border-radius: 8px; transition: all 0.2s; }
+    .form-check-input:checked + .option-label { background: #e9ecef; }
+    .correct-answer { background: #d4edda !important; color: #155724 !important; font-weight: bold; border: 2px solid #28a745; }
+    .wrong-answer { background: #f8d7da !important; color: #721c24 !important; border: 2px solid #dc3545; }
+    .explanation { background: #e9f7ef; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 0.97rem; line-height: 1.6; }
+    #score { text-align: center; font-size: 1.8rem; margin-top: 30px; padding: 20px; border-radius: 12px; }
+    #loading { text-align: center; color: #007bff; font-size: 1.4rem; margin: 25px 0; display: none; }
+    footer { margin-top: auto; background: #f8f9fa; padding: 30px 15px; text-align: center; border-top: 1px solid #dee2e6; font-size: 0.96rem; color: #495057; }
+    .progress { height: 28px; margin-top: 18px; border-radius: 14px; }
+    .exam-list { font-size: 0.92rem; margin-top: 12px; color: #6c757d; line-height: 1.7; }
+    @media (max-width: 576px) { .container { padding: 20px; margin: 15px; } .header { padding: 20px 10px; } h1 { font-size: 1.8rem; } }
   </style>
 </head>
 <body>
 
   <header class="header">
     <h1>RankWise India - AI से अनलिमिटेड MCQ क्विज</h1>
-    <p>GS, रीजनिंग, हिंदी, गणित के लिए हिंदी में अनलिमिटेड ऑब्जेक्टिव प्रश्न — पूरी तरह फ्री!</p>
+    <p>SSC, RRB, Delhi Police, Banking, Defence और सभी सरकारी परीक्षाओं के लिए हिंदी में अनलिमिटेड ऑब्जेक्टिव प्रश्न — पूरी तरह फ्री!</p>
   </header>
 
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-md-10">
-        <label for="subject" class="form-label fw-bold">विषय चुनें:</label>
-        <select id="subject" class="form-select mb-3">
+      <div class="col-md-10 col-lg-9">
+        <label for="subject" class="form-label">विषय चुनें:</label>
+        <select id="subject" class="form-select mb-4">
           <option value="सामान्य अध्ययन (GS)">सामान्य अध्ययन (GS)</option>
           <option value="तर्कशक्ति / रीजनिंग">तर्कशक्ति / रीजनिंग</option>
           <option value="हिंदी व्याकरण / साहित्य">हिंदी व्याकरण / साहित्य</option>
           <option value="गणित / मैथ्स">गणित / मैथ्स</option>
         </select>
 
-        <label for="topic" class="form-label fw-bold">टॉपिक (ऑप्शनल):</label>
-        <input type="text" id="topic" class="form-control mb-3" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग">
+        <label for="topic" class="form-label">टॉपिक (ऑप्शनल):</label>
+        <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग, भारतीय इतिहास">
 
-        <label for="level" class="form-label fw-bold">कठिनाई स्तर:</label>
-        <select id="level" class="form-select mb-3">
+        <label for="level" class="form-label">कठिनाई स्तर:</label>
+        <select id="level" class="form-select mb-4">
           <option value="आसान">आसान</option>
           <option value="मध्यम" selected>मध्यम</option>
           <option value="कठिन">कठिन</option>
         </select>
 
-        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4" onclick="generateQuiz()">10 प्रश्न जनरेट करें</button>
+        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4 py-3" onclick="generateQuiz()">10 प्रश्न जनरेट करें</button>
 
-        <div id="loading" class="alert alert-info">प्रश्न जनरेट हो रहे हैं... 5-25 सेकंड लग सकते हैं</div>
+        <div id="loading" class="alert alert-info text-center fs-5">प्रश्न जनरेट हो रहे हैं... कृपया 5 से 30 सेकंड तक इंतजार करें</div>
 
         <form id="quizForm">
           <div id="questions"></div>
-          <button type="button" id="submitBtn" class="btn btn-success btn-lg w-100 mt-4" onclick="submitQuiz()" style="display: none;">क्विज सबमिट करें & स्कोर देखें</button>
+          <button type="button" id="submitBtn" class="btn btn-success btn-lg w-100 mt-4 py-3" onclick="submitQuiz()" style="display: none;">क्विज सबमिट करें और स्कोर देखें</button>
         </form>
 
-        <div id="score" class="alert alert-success" style="display: none;"></div>
+        <div id="score" class="alert" style="display: none;"></div>
       </div>
     </div>
   </div>
 
   <footer>
     <p>Created by Naveen from Nagla Ugrasen, Post Kuchesar, District Bulandshahr, Uttar Pradesh. This is an AI-powered platform for unlimited objective quizzes in Hindi for GS, Reasoning, Hindi, and Math.</p>
-    <p class="exam-list">हम SSC CGL, SSC CHSL, SSC MTS, SSC GD Constable, SSC CPO, Delhi Police Constable, Delhi Police Head Constable, RRB NTPC, RRB Group D, RRB ALP, RRB JE, IBPS PO/Clerk, SBI PO/Clerk, RPF Constable/SI, UPSC CDS/NDA और अन्य प्रमुख सरकारी भर्तियों के लिए प्रैक्टिस क्विज प्रदान करते हैं।</p>
+    <p class="exam-list">हम SSC CGL, SSC CHSL, SSC MTS, SSC GD Constable, SSC CPO, Delhi Police Constable, Delhi Police Head Constable, RRB NTPC, RRB Group D, RRB ALP, RRB JE, IBPS PO/Clerk, SBI PO/Clerk, RPF Constable/SI, UPSC CDS/NDA और अन्य प्रमुख सरकारी भर्तियों/परीक्षाओं के लिए प्रैक्टिस क्विज प्रदान करते हैं।</p>
     <p>For queries, contact: [अपना ईमेल डालें या हटाएं]। © 2026 RankWise India.</p>
   </footer>
 
@@ -93,7 +97,7 @@
       const topic = document.getElementById('topic').value.trim() || 'सामान्य';
       const level = document.getElementById('level').value;
 
-      const apiKey = 'AIzaSyA8cvIS2eucpZGVe4-WlAcO-7GaeXGmH9k'; // ← नया की डालो अगर पुरानी काम न करे
+      const apiKey = 'AIzaSyAdhg2D0pGHxULQhnNPigW2Ozm-kbVse88'; // ← तुम्हारी नई की डाली हुई है
 
       const prompt = `
 तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।
@@ -118,7 +122,7 @@
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
           // अगर 404 आए तो ये ट्राई करो:
           // `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`
-          // या `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${apiKey}`
+          // या `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -148,7 +152,7 @@
               <h5 class="card-title">प्रश्न ${i + 1}: ${q.question}</h5>
               ${q.options.map((opt, j) => `
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}" onchange="highlightAnswer(this, '${q.correct}', ${i}, ${j})">
+                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}" onchange="highlightAnswer(this, '${q.correct}', \( {i}, ' \){opt.charAt(0)}')">
                   <label class="form-check-label option-label" for="q\( {i}_ \){j}">${opt}</label>
                 </div>
               `).join('')}
@@ -161,23 +165,29 @@
         submitBtn.style.display = 'block';
 
       } catch (error) {
-        questionsDiv.innerHTML = `<div class="alert alert-danger">एरर: ${error.message}<br>संभावित फिक्स: नया API key लें (aistudio.google.com) या ऊपर कमेंट में दिए मॉडल नाम ट्राई करें।</div>`;
+        questionsDiv.innerHTML = `<div class="alert alert-danger">
+          <strong>एरर:</strong> ${error.message}<br>
+          <small>संभावित फिक्स:<br>
+          1. नई API key लें (aistudio.google.com)<br>
+          2. मॉडल नाम बदलकर ऊपर कमेंट में दिए नाम ट्राई करें<br>
+          3. अगर "leaked" या "permission denied" आए तो नया की बनाओ</small>
+        </div>`;
       }
 
       btn.disabled = false;
       loading.style.display = 'none';
     }
 
-    // ऑप्शन सिलेक्ट करने पर तुरंत राइट/रॉन्ग हाइलाइट
-    function highlightAnswer(input, correct, qIndex, optIndex) {
+    function highlightAnswer(input, correct, qIndex, selectedValue) {
       const labels = document.querySelectorAll(`input[name="q${qIndex}"] \~ label`);
-      labels.forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
+      labels.forEach(label => {
+        label.classList.remove('correct-answer', 'wrong-answer');
+      });
 
-      if (input.value === correct) {
+      if (selectedValue === correct) {
         input.nextElementSibling.classList.add('correct-answer');
       } else {
         input.nextElementSibling.classList.add('wrong-answer');
-        // सही वाला भी हाइलाइट करो
         const correctInput = document.querySelector(`input[name="q\( {qIndex}"][value=" \){correct}"]`);
         if (correctInput) correctInput.nextElementSibling.classList.add('correct-answer');
       }
@@ -197,7 +207,6 @@
           score++;
         }
 
-        // सही ऑप्शन हमेशा हाइलाइट रहे
         const correctOpt = document.querySelector(`input[value="\( {q.correct}"][name="q \){i}"]`);
         if (correctOpt) correctOpt.nextElementSibling.classList.add('correct-answer');
       });
