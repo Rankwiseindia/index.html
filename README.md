@@ -1,171 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<title>Rankwise Pro Quiz</title>
-<style>
-body{
-  font-family: Arial;
-  background:#f2f4f8;
-  text-align:center;
-}
-.container{
-  width:95%;
-  max-width:600px;
-  margin:auto;
-  margin-top:20px;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 15px rgba(0,0,0,0.2);
-}
-button{
-  display:block;
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  font-size:16px;
-  cursor:pointer;
-}
-.progress{
-  height:10px;
-  background:#ddd;
-  border-radius:5px;
-  overflow:hidden;
-}
-.progress-bar{
-  height:10px;
-  background:green;
-  width:0%;
-}
-.correct{background:green;color:white;}
-.wrong{background:red;color:white;}
-#timer{color:red;font-weight:bold;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI अनलिमिटेड MCQ क्विज - फ्री (GS, Reasoning, हिंदी, मैथ)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #0277bd;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #555;
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+      color: #444;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 25px 0 15px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #43A047;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    #loading {
+      text-align: center;
+      font-size: 18px;
+      color: #0277bd;
+      margin: 20px 0;
+      display: none;
+    }
+    #questions {
+      margin-top: 30px;
+    }
+    .question {
+      background: #f9f9f9;
+      padding: 18px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 5px solid #4CAF50;
+    }
+    .question h3 {
+      margin-top: 0;
+      color: #d32f2f;
+    }
+    .options {
+      margin: 10px 0;
+    }
+    .correct {
+      font-weight: bold;
+      color: #2e7d32;
+      margin-top: 10px;
+    }
+    .explanation {
+      background: #e8f5e9;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 15px; }
+      button { font-size: 16px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
+    <h1>AI से अनलिमिटेड MCQ क्विज</h1>
+    <p class="subtitle">GS • रीजनिंग • हिंदी • गणित — सब हिंदी में, फ्री में!</p>
 
-<h2>Rankwise Professional Quiz</h2>
+    <label for="subject">विषय चुनें:</label>
+    <select id="subject">
+      <option value="सामान्य अध्ययन (GS)">सामान्य अध्ययन (GS)</option>
+      <option value="तर्कशक्ति / रीजनिंग">तर्कशक्ति / रीजनिंग</option>
+      <option value="हिंदी व्याकरण / साहित्य">हिंदी व्याकरण / साहित्य</option>
+      <option value="गणित / मैथ्स">गणित / मैथ्स</option>
+    </select>
 
-<div id="categoryBox">
-<button onclick="startQuiz('gs')">Start GS</button>
-<button onclick="startQuiz('math')">Start Math</button>
-</div>
+    <label for="topic">टॉपिक (ऑप्शनल):</label>
+    <input type="text" id="topic" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग">
 
-<div id="quizBox" style="display:none;">
-<p id="timer"></p>
-<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-<p id="question"></p>
-<div id="options"></div>
-</div>
+    <label for="level">कठिनाई स्तर:</label>
+    <select id="level">
+      <option value="आसान">आसान</option>
+      <option value="मध्यम" selected>मध्यम</option>
+      <option value="कठिन">कठिन</option>
+    </select>
 
-</div>
+    <button id="generateBtn" onclick="generateQuiz()">10 प्रश्न जनरेट करें</button>
 
-<script>
+    <div id="loading">प्रश्न बन रहे हैं... कृपया 5-15 सेकंड इंतजार करें</div>
 
-const questions = {
-gs:[
-{q:"भारत का संविधान कब लागू हुआ?",o:["15 अगस्त 1947","26 जनवरी 1950","2 अक्टूबर 1949","1 जनवरी 1952"],a:1},
-{q:"भारत का पहला राष्ट्रपति?",o:["नेहरू","राजेन्द्र प्रसाद","गांधी","पटेल"],a:1}
-],
-math:[
-{q:"20 × 5 = ?",o:["100","120","150","80"],a:0},
-{q:"50 ÷ 5 = ?",o:["5","15","10","20"],a:2}
-]
-};
+    <div id="questions"></div>
+  </div>
 
-let current=0;
-let score=0;
-let wrong=0;
-let selected="";
-let timer;
-let timeLeft=30;
-let shuffled=[];
-let review=[];
+  <script>
+    async function generateQuiz() {
+      const btn = document.getElementById('generateBtn');
+      const loading = document.getElementById('loading');
+      const questionsDiv = document.getElementById('questions');
 
-function startQuiz(cat){
-selected=cat;
-shuffled = questions[cat].sort(()=>Math.random()-0.5);
-document.getElementById("categoryBox").style.display="none";
-document.getElementById("quizBox").style.display="block";
-loadQuestion();
-startTimer();
-}
+      btn.disabled = true;
+      loading.style.display = 'block';
+      questionsDiv.innerHTML = '';
 
-function loadQuestion(){
-let q=shuffled[current];
-document.getElementById("question").innerText=q.q;
+      const subject = document.getElementById('subject').value;
+      const topic = document.getElementById('topic').value.trim() || 'सामान्य';
+      const level = document.getElementById('level').value;
 
-let optionsHTML="";
-q.o.forEach((opt,i)=>{
-optionsHTML+=`<button onclick="checkAnswer(${i},this)">${opt}</button>`;
-});
-document.getElementById("options").innerHTML=optionsHTML;
+      const apiKey = 'AIzaSyA8cvIS2eucpZGVe4-WlAcO-7GaeXGmH9k';
 
-updateProgress();
-}
+      const prompt = `
+      तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।
+      विषय: ${subject}
+      टॉपिक: ${topic}
+      स्तर: ${level}
+      
+      ठीक 10 MCQ प्रश्न बनाओ, केवल हिंदी में।
+      हर प्रश्न के लिए:
+      - प्रश्न संख्या और प्रश्न
+      - A) विकल्प1
+      - B) विकल्प2
+      - C) विकल्प3
+      - D) विकल्प4
+      - सही उत्तर: (A या B या C या D)
+      - स्पष्टीकरण: 2-4 लाइन में आसान हिंदी में
+      
+      सिर्फ प्रश्नों की लिस्ट दो, कोई अतिरिक्त टेक्स्ट मत लिखना।
+      `;
 
-function checkAnswer(i,btn){
-clearInterval(timer);
-let correctAns=shuffled[current].a;
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          }
+        );
 
-if(i===correctAns){
-score++;
-btn.classList.add("correct");
-review.push("Q"+(current+1)+": Correct");
-}else{
-wrong++;
-btn.classList.add("wrong");
-review.push("Q"+(current+1)+": Wrong");
-}
+        if (!response.ok) {
+          throw new Error('API से समस्या: ' + response.status);
+        }
 
-setTimeout(nextQuestion,1000);
-}
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'कोई जवाब नहीं मिला';
 
-function nextQuestion(){
-current++;
-if(current<shuffled.length){
-timeLeft=30;
-loadQuestion();
-startTimer();
-}else{
-endQuiz();
-}
-}
+        // टेक्स्ट को HTML में बदलकर दिखाओ
+        const formatted = text
+          .replace(/\n/g, '<br>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/सही उत्तर:/g, '<div class="correct">सही उत्तर:</div>')
+          .replace(/स्पष्टीकरण:/g, '<div class="explanation">स्पष्टीकरण:</div>');
 
-function startTimer(){
-document.getElementById("timer").innerText="Time Left: "+timeLeft;
-timer=setInterval(()=>{
-timeLeft--;
-document.getElementById("timer").innerText="Time Left: "+timeLeft;
-if(timeLeft<=0){
-wrong++;
-review.push("Q"+(current+1)+": Time Up");
-clearInterval(timer);
-nextQuestion();
-}
-},1000);
-}
+        const questionBlocks = formatted.split(/प्रश्न \d+/).filter(Boolean);
+        let html = '';
 
-function updateProgress(){
-let percent=((current)/shuffled.length)*100;
-document.getElementById("progressBar").style.width=percent+"%";
-}
+        questionBlocks.forEach((block, i) => {
+          if (block.trim()) {
+            html += `<div class="question">
+              <h3>प्रश्न ${i + 1}</h3>
+              ${block.trim()}
+            </div>`;
+          }
+        });
 
-function endQuiz(){
-let finalScore = score - (wrong*0.25);
-document.querySelector(".container").innerHTML=
-"<h2>Quiz Completed 🎉</h2>"+
-"<p>Correct: "+score+"</p>"+
-"<p>Wrong: "+wrong+"</p>"+
-"<p>Final Score (Negative -0.25): "+finalScore.toFixed(2)+"</p>"+
-"<h3>Review:</h3><p>"+review.join("<br>")+"</p>"+
-"<button onclick='location.reload()'>Restart</button>";
-}
+        questionsDiv.innerHTML = html || '<p style="color:red;">प्रश्न लोड करने में समस्या आई। बाद में ट्राई करें।</p>';
 
-</script>
+      } catch (error) {
+        questionsDiv.innerHTML = `<p style="color:red;">एरर: ${error.message}<br>API की चेक करें या कल ट्राई करें (फ्री लिमिट हो सकती है)।</p>`;
+        console.error(error);
+      }
+
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  </script>
 
 </body>
 </html>
