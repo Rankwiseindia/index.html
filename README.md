@@ -56,13 +56,13 @@
           <option value="कठिन">कठिन</option>
         </select>
 
-        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4 py-3" onclick="generateQuiz()">10 प्रश्न जनरेट करें</button>
+        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4 py-3">10 प्रश्न जनरेट करें</button>
 
         <div id="loading" class="alert alert-info text-center fs-5">प्रश्न जनरेट हो रहे हैं... कृपया 5 से 30 सेकंड तक इंतजार करें</div>
 
         <form id="quizForm">
           <div id="questions"></div>
-          <button type="button" id="submitBtn" class="btn btn-success btn-lg w-100 mt-4 py-3" onclick="submitQuiz()" style="display: none;">क्विज सबमिट करें और स्कोर देखें</button>
+          <button type="button" id="submitBtn" class="btn btn-success btn-lg w-100 mt-4 py-3" style="display: none;">क्विज सबमिट करें और स्कोर देखें</button>
         </form>
 
         <div id="score" class="alert" style="display: none;"></div>
@@ -71,14 +71,16 @@
   </div>
 
   <footer>
-    <p>Created by Naveen from Nagla Ugrasen, Post Kuchesar, District Bulandshahr, Uttar Pradesh. This is an AI-powered platform for unlimited objective quizzes in Hindi for GS, Reasoning, Hindi, and Math.</p>
+    <p>Created by Naveen from Nagla Ugrasen, Post Kuchesar, District Bulandshahr, Uttar Pradesh.</p>
     <p class="exam-list">हम SSC CGL, SSC CHSL, SSC MTS, SSC GD Constable, SSC CPO, Delhi Police Constable, Delhi Police Head Constable, RRB NTPC, RRB Group D, RRB ALP, RRB JE, IBPS PO/Clerk, SBI PO/Clerk, RPF Constable/SI, UPSC CDS/NDA और अन्य प्रमुख सरकारी भर्तियों/परीक्षाओं के लिए प्रैक्टिस क्विज प्रदान करते हैं।</p>
-    <p>For queries, contact: [अपना ईमेल डालें या हटाएं]। © 2026 RankWise India.</p>
+    <p>© 2026 RankWise India.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script>
     let questionsData = [];
+
+    document.getElementById('generateBtn').addEventListener('click', generateQuiz);
 
     async function generateQuiz() {
       const btn = document.getElementById('generateBtn');
@@ -93,11 +95,8 @@
       submitBtn.style.display = 'none';
       scoreDiv.style.display = 'none';
 
-      const subject = document.getElementById('subject').value;
-      const topic = document.getElementById('topic').value.trim() || 'सामान्य';
-      const level = document.getElementById('level').value;
+      const apiKey = prompt('Groq API Key डालो (https://console.groq.com से कॉपी करो)')?.trim();
 
-      const apiKey = prompt('Groq API Key डालो (https://console.groq.com से कॉपी करो)') || '';
       if (!apiKey) {
         questionsDiv.innerHTML = '<div class="alert alert-danger">API Key नहीं डाली गई।</div>';
         btn.disabled = false;
@@ -105,50 +104,58 @@
         return;
       }
 
-      const prompt = `
-तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।
-विषय: ${subject}
-टॉपिक: ${topic}
-स्तर: ${level}
+      const subject = document.getElementById('subject').value;
+      const topic = document.getElementById('topic').value.trim() || 'सामान्य';
+      const level = document.getElementById('level').value;
 
-ठीक 10 MCQ प्रश्न बनाओ, केवल हिंदी में।
-आउटपुट सिर्फ JSON ऐरे में दो, कुछ और मत लिखना:
-[
-  {
-    "question": "प्रश्न टेक्स्ट",
-    "options": ["A) ऑप्शन1", "B) ऑप्शन2", "C) ऑप्शन3", "D) ऑप्शन4"],
-    "correct": "A",
-    "explanation": "स्पष्टीकरण 2-4 लाइन में"
-  }
-]
-      `;
+      const prompt = `तुम एक प्रोफेशनल हिंदी एग्जाम क्वेश्चन मेकर हो।  
+विषय: ${subject}  
+टॉपिक: ${topic}  
+स्तर: ${level}  
+
+ठीक 10 MCQ प्रश्न बनाओ, केवल हिंदी में।  
+प्रत्येक प्रश्न में 4 विकल्प (A, B, C, D) हों।  
+आउटपुट सिर्फ JSON ऐरे में दो, कुछ और मत लिखना:  
+[  
+  {  
+    "question": "प्रश्न टेक्स्ट",  
+    "options": ["A) ऑप्शन1", "B) ऑप्शन2", "C) ऑप्शन3", "D) ऑप्शन4"],  
+    "correct": "A",  
+    "explanation": "स्पष्टीकरण 2-4 लाइन में"  
+  }  
+]`;
 
       try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: 'llama-3.1-70b-versatile',
-            messages: [{ role: 'user', content: prompt }],
+            model: "llama-3.1-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
             max_tokens: 2048
           })
         });
 
         if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`API एरर ${response.status}: ${errText}`);
+          const err = await response.json();
+          throw new Error(err.error?.message || 'API एरर');
         }
 
         const data = await response.json();
-        const text = data.choices[0].message.content;
+        const text = data.choices[0].message.content.trim();
         const jsonMatch = text.match(/\[[\s\S]*\]/);
-        questionsData = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
-        if (questionsData.length === 0) throw new Error('प्रश्न नहीं मिले');
+        if (!jsonMatch) throw new Error('JSON नहीं मिला');
+
+        questionsData = JSON.parse(jsonMatch[0]);
+
+        if (!Array.isArray(questionsData) || questionsData.length === 0) {
+          throw new Error('प्रश्न नहीं मिले');
+        }
 
         questionsData.forEach((q, i) => {
           const card = document.createElement('div');
@@ -174,9 +181,9 @@
         questionsDiv.innerHTML = `<div class="alert alert-danger">
           <strong>एरर:</strong> ${error.message}<br>
           <small>संभावित फिक्स:<br>
-          1. नई Groq API key लें (console.groq.com)<br>
-          2. अगर "leaked" आए तो नया की बनाओ<br>
-          3. अगर "rate limit" आए तो थोड़ा इंतजार करो</small>
+          1. Groq API key सही डालो (console.groq.com)<br>
+          2. अगर "rate limit" आए तो थोड़ा इंतजार करो<br>
+          3. अगर "invalid key" आए तो नया key बनाओ</small>
         </div>`;
       }
 
@@ -205,7 +212,7 @@
       questionsData.forEach((q, i) => {
         const selected = document.querySelector(`input[name="q${i}"]:checked`);
         const exp = document.getElementById(`exp${i}`);
-        exp.style.display = 'block';
+        if (exp) exp.style.display = 'block';
 
         if (selected && selected.value === q.correct) {
           score++;
@@ -216,12 +223,15 @@
       });
 
       const percentage = ((score / total) * 100).toFixed(2);
-      scoreDiv.innerHTML = `आपका स्कोर: <strong>\( {score}/ \){total}</strong> (${percentage}%)`;
+      scoreDiv.innerHTML = `
+        आपका स्कोर: <strong>\( {score}/ \){total}</strong> (${percentage}%)<br>
+        ${percentage >= 70 ? 'बहुत अच्छा!' : 'अगली बार और बेहतर करेंगे।'}
+      `;
       scoreDiv.className = percentage >= 70 ? 'alert alert-success' : 'alert alert-warning';
       scoreDiv.style.display = 'block';
 
       const progress = document.createElement('div');
-      progress.className = 'progress';
+      progress.className = 'progress mt-3';
       progress.innerHTML = `<div class="progress-bar ${percentage >= 70 ? 'bg-success' : 'bg-warning'}" role="progressbar" style="width: \( {percentage}%" aria-valuenow=" \){percentage}" aria-valuemin="0" aria-valuemax="100">${percentage}%</div>`;
       scoreDiv.appendChild(progress);
     }
