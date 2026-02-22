@@ -99,9 +99,9 @@
       document.getElementById('customNumDiv').style.display = this.value === 'custom' ? 'block' : 'none';
     });
 
-    // बटन क्लिक
-    document.getElementById('generateBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('generateBtn');
+    // बटन पर क्लिक करने के लिए इवेंट लिसनर (onclick हटाकर)
+    document.getElementById('generateBtn').addEventListener('click', async function() {
+      const btn = this;
       const loading = document.getElementById('loading');
       const questionsDiv = document.getElementById('questions');
       const submitBtn = document.getElementById('submitBtn');
@@ -165,7 +165,10 @@
           })
         });
 
-        if (!response.ok) throw new Error('API एरर: ' + response.status);
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error?.message || 'API एरर');
+        }
 
         const data = await response.json();
         const text = data.choices[0].message.content.trim();
@@ -175,7 +178,9 @@
 
         questionsData = JSON.parse(jsonMatch[0]);
 
-        if (questionsData.length === 0) throw new Error('प्रश्न नहीं मिले');
+        if (!Array.isArray(questionsData) || questionsData.length === 0) {
+          throw new Error('प्रश्न नहीं मिले');
+        }
 
         questionsData.forEach((q, i) => {
           const card = document.createElement('div');
@@ -206,7 +211,7 @@
 
       btn.disabled = false;
       loading.style.display = 'none';
-    }
+    });
 
     function submitQuiz() {
       const scoreDiv = document.getElementById('score');
