@@ -55,7 +55,7 @@
           <option value="20">20 प्रश्न</option>
           <option value="40">40 प्रश्न</option>
           <option value="50">50 प्रश्न</option>
-          <option value="custom">कस्टम संख्या (नीचे लिखें)</option>
+          <option value="custom">कस्टम संख्या</option>
         </select>
 
         <div id="customNumDiv" style="display:none;" class="mb-4">
@@ -94,16 +94,13 @@
   <script>
     let questionsData = [];
 
-    // प्रश्न संख्या ड्रॉपडाउन चेंज पर कस्टम दिखाओ/छिपाओ
+    // प्रश्न संख्या चुनने पर कस्टम दिखाओ
     document.getElementById('numQuestions').addEventListener('change', function() {
-      const customDiv = document.getElementById('customNumDiv');
-      customDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+      document.getElementById('customNumDiv').style.display = this.value === 'custom' ? 'block' : 'none';
     });
 
-    // बटन पर क्लिक
-    document.getElementById('generateBtn').addEventListener('click', generateQuiz);
-
-    async function generateQuiz() {
+    // बटन क्लिक
+    document.getElementById('generateBtn').addEventListener('click', async () => {
       const btn = document.getElementById('generateBtn');
       const loading = document.getElementById('loading');
       const questionsDiv = document.getElementById('questions');
@@ -116,7 +113,7 @@
       submitBtn.style.display = 'none';
       scoreDiv.style.display = 'none';
 
-      const apiKey = prompt('Groq API Key डालो (https://console.groq.com से कॉपी करो)')?.trim();
+      const apiKey = prompt('Groq API Key डालो (https://console.groq.com/keys से कॉपी करो)')?.trim();
       if (!apiKey) {
         questionsDiv.innerHTML = '<div class="alert alert-danger">API Key नहीं डाली गई।</div>';
         btn.disabled = false;
@@ -127,10 +124,7 @@
       let numQuestions = document.getElementById('numQuestions').value;
       if (numQuestions === 'custom') {
         numQuestions = parseInt(document.getElementById('customNum').value) || 10;
-        if (numQuestions < 10 || numQuestions > 100) {
-          numQuestions = 10;
-          alert('10 से 100 तक चुनें, डिफॉल्ट 10 सेट किया गया');
-        }
+        if (numQuestions < 10 || numQuestions > 100) numQuestions = 10;
       } else {
         numQuestions = parseInt(numQuestions);
       }
@@ -146,7 +140,7 @@
 
 ठीक ${numQuestions} MCQ प्रश्न बनाओ, केवल हिंदी में।  
 प्रत्येक प्रश्न में 4 विकल्प (A, B, C, D) हों।  
-आउटपुट सिर्फ JSON ऐरे में दो, कुछ और मत लिखना:  
+आउटपुट सिर्फ JSON ऐरे में दो:  
 [  
   {  
     "question": "प्रश्न टेक्स्ट",  
@@ -171,10 +165,7 @@
           })
         });
 
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error?.message || 'API एरर');
-        }
+        if (!response.ok) throw new Error('API एरर: ' + response.status);
 
         const data = await response.json();
         const text = data.choices[0].message.content.trim();
@@ -184,9 +175,7 @@
 
         questionsData = JSON.parse(jsonMatch[0]);
 
-        if (!Array.isArray(questionsData) || questionsData.length === 0) {
-          throw new Error('प्रश्न नहीं मिले');
-        }
+        if (questionsData.length === 0) throw new Error('प्रश्न नहीं मिले');
 
         questionsData.forEach((q, i) => {
           const card = document.createElement('div');
@@ -211,10 +200,7 @@
       } catch (error) {
         questionsDiv.innerHTML = `<div class="alert alert-danger">
           <strong>एरर:</strong> ${error.message}<br>
-          <small>संभावित फिक्स:<br>
-          1. Groq API key सही डालो (console.groq.com से)<br>
-          2. अगर "rate limit" आए तो थोड़ा इंतजार करो<br>
-          3. अगर "invalid key" आए तो नया key बनाओ</small>
+          <small>फिक्स: Groq key सही डालो या नया बनाओ। अगर rate limit आए तो 1-2 मिनट इंतजार करो।</small>
         </div>`;
       }
 
