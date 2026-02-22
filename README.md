@@ -49,6 +49,20 @@
         <label for="topic" class="form-label">टॉपिक (ऑप्शनल):</label>
         <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग, भारतीय इतिहास">
 
+        <label for="numQuestions" class="form-label">प्रश्नों की संख्या चुनें:</label>
+        <select id="numQuestions" class="form-select mb-4">
+          <option value="10" selected>10 प्रश्न</option>
+          <option value="20">20 प्रश्न</option>
+          <option value="40">40 प्रश्न</option>
+          <option value="50">50 प्रश्न</option>
+          <option value="custom">कस्टम संख्या (नीचे लिखें)</option>
+        </select>
+
+        <div id="customNumDiv" style="display:none;" class="mb-4">
+          <label for="customNum" class="form-label">कितने प्रश्न चाहिए? (10 से 100 तक):</label>
+          <input type="number" id="customNum" class="form-control" min="10" max="100" value="10">
+        </div>
+
         <label for="level" class="form-label">कठिनाई स्तर:</label>
         <select id="level" class="form-select mb-4">
           <option value="आसान">आसान</option>
@@ -56,9 +70,9 @@
           <option value="कठिन">कठिन</option>
         </select>
 
-        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4 py-3">10 प्रश्न जनरेट करें</button>
+        <button id="generateBtn" class="btn btn-primary btn-lg w-100 mb-4 py-3">प्रश्न जनरेट करें</button>
 
-        <div id="loading" class="alert alert-info text-center fs-5">प्रश्न जनरेट हो रहे हैं... कृपया 5 से 30 सेकंड तक इंतजार करें</div>
+        <div id="loading" class="alert alert-info text-center fs-5">प्रश्न जनरेट हो रहे हैं... कृपया 5 से 60 सेकंड तक इंतजार करें</div>
 
         <form id="quizForm">
           <div id="questions"></div>
@@ -80,6 +94,13 @@
   <script>
     let questionsData = [];
 
+    // प्रश्न संख्या ड्रॉपडाउन चेंज पर कस्टम दिखाओ/छिपाओ
+    document.getElementById('numQuestions').addEventListener('change', function() {
+      const customDiv = document.getElementById('customNumDiv');
+      customDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
+
+    // बटन पर क्लिक
     document.getElementById('generateBtn').addEventListener('click', generateQuiz);
 
     async function generateQuiz() {
@@ -96,12 +117,22 @@
       scoreDiv.style.display = 'none';
 
       const apiKey = prompt('Groq API Key डालो (https://console.groq.com से कॉपी करो)')?.trim();
-
       if (!apiKey) {
         questionsDiv.innerHTML = '<div class="alert alert-danger">API Key नहीं डाली गई।</div>';
         btn.disabled = false;
         loading.style.display = 'none';
         return;
+      }
+
+      let numQuestions = document.getElementById('numQuestions').value;
+      if (numQuestions === 'custom') {
+        numQuestions = parseInt(document.getElementById('customNum').value) || 10;
+        if (numQuestions < 10 || numQuestions > 100) {
+          numQuestions = 10;
+          alert('10 से 100 तक चुनें, डिफॉल्ट 10 सेट किया गया');
+        }
+      } else {
+        numQuestions = parseInt(numQuestions);
       }
 
       const subject = document.getElementById('subject').value;
@@ -113,7 +144,7 @@
 टॉपिक: ${topic}  
 स्तर: ${level}  
 
-ठीक 10 MCQ प्रश्न बनाओ, केवल हिंदी में।  
+ठीक ${numQuestions} MCQ प्रश्न बनाओ, केवल हिंदी में।  
 प्रत्येक प्रश्न में 4 विकल्प (A, B, C, D) हों।  
 आउटपुट सिर्फ JSON ऐरे में दो, कुछ और मत लिखना:  
 [  
@@ -136,7 +167,7 @@
             model: "llama-3.1-70b-versatile",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
-            max_tokens: 2048
+            max_tokens: 4096
           })
         });
 
@@ -147,8 +178,8 @@
 
         const data = await response.json();
         const text = data.choices[0].message.content.trim();
-        const jsonMatch = text.match(/\[[\s\S]*\]/);
 
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
         if (!jsonMatch) throw new Error('JSON नहीं मिला');
 
         questionsData = JSON.parse(jsonMatch[0]);
@@ -165,7 +196,7 @@
               <h5 class="card-title">प्रश्न ${i + 1}: ${q.question}</h5>
               ${q.options.map((opt, j) => `
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}" onchange="highlightAnswer(this, '${q.correct}', \( {i}, ' \){opt.charAt(0)}')">
+                  <input class="form-check-input" type="radio" name="q\( {i}" id="q \){i}_\( {j}" value=" \){opt.charAt(0)}">
                   <label class="form-check-label option-label" for="q\( {i}_ \){j}">${opt}</label>
                 </div>
               `).join('')}
@@ -181,7 +212,7 @@
         questionsDiv.innerHTML = `<div class="alert alert-danger">
           <strong>एरर:</strong> ${error.message}<br>
           <small>संभावित फिक्स:<br>
-          1. Groq API key सही डालो (console.groq.com)<br>
+          1. Groq API key सही डालो (console.groq.com से)<br>
           2. अगर "rate limit" आए तो थोड़ा इंतजार करो<br>
           3. अगर "invalid key" आए तो नया key बनाओ</small>
         </div>`;
@@ -189,19 +220,6 @@
 
       btn.disabled = false;
       loading.style.display = 'none';
-    }
-
-    function highlightAnswer(input, correct, qIndex, selectedValue) {
-      const labels = document.querySelectorAll(`input[name="q${qIndex}"] \~ label`);
-      labels.forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
-
-      if (selectedValue === correct) {
-        input.nextElementSibling.classList.add('correct-answer');
-      } else {
-        input.nextElementSibling.classList.add('wrong-answer');
-        const correctInput = document.querySelector(`input[name="q\( {qIndex}"][value=" \){correct}"]`);
-        if (correctInput) correctInput.nextElementSibling.classList.add('correct-answer');
-      }
     }
 
     function submitQuiz() {
@@ -214,12 +232,17 @@
         const exp = document.getElementById(`exp${i}`);
         if (exp) exp.style.display = 'block';
 
-        if (selected && selected.value === q.correct) {
-          score++;
-        }
+        const correctLabel = document.querySelector(`input[value="\( {q.correct}"][name="q \){i}"]`)?.nextElementSibling;
+        if (correctLabel) correctLabel.classList.add('correct-answer');
 
-        const correctOpt = document.querySelector(`input[value="\( {q.correct}"][name="q \){i}"]`);
-        if (correctOpt) correctOpt.nextElementSibling.classList.add('correct-answer');
+        if (selected) {
+          const selectedLabel = selected.nextElementSibling;
+          if (selected.value === q.correct) {
+            score++;
+          } else {
+            selectedLabel.classList.add('wrong-answer');
+          }
+        }
       });
 
       const percentage = ((score / total) * 100).toFixed(2);
@@ -235,6 +258,8 @@
       progress.innerHTML = `<div class="progress-bar ${percentage >= 70 ? 'bg-success' : 'bg-warning'}" role="progressbar" style="width: \( {percentage}%" aria-valuenow=" \){percentage}" aria-valuemin="0" aria-valuemax="100">${percentage}%</div>`;
       scoreDiv.appendChild(progress);
     }
+
+    document.getElementById('submitBtn').addEventListener('click', submitQuiz);
   </script>
 </body>
 </html>
