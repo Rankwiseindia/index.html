@@ -47,7 +47,7 @@
         </select>
 
         <label for="topic" class="form-label">टॉपिक (ऑप्शनल):</label>
-        <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग, भारतीय इतिहास">
+        <input type="text" id="topic" class="form-control mb-4" placeholder="जैसे: भारतीय संविधान, प्रतिशत, संधि, कोडिंग-डिकोडिंग">
 
         <label for="numQuestions" class="form-label">प्रश्नों की संख्या चुनें:</label>
         <select id="numQuestions" class="form-select mb-4">
@@ -99,7 +99,7 @@
       document.getElementById('customNumDiv').style.display = this.value === 'custom' ? 'block' : 'none';
     });
 
-    // बटन पर क्लिक करने के लिए इवेंट लिसनर (onclick हटाकर)
+    // बटन क्लिक
     document.getElementById('generateBtn').addEventListener('click', async function() {
       const btn = this;
       const loading = document.getElementById('loading');
@@ -113,9 +113,10 @@
       submitBtn.style.display = 'none';
       scoreDiv.style.display = 'none';
 
+      // API key prompt
       const apiKey = prompt('Groq API Key डालो (https://console.groq.com/keys से कॉपी करो)')?.trim();
       if (!apiKey) {
-        questionsDiv.innerHTML = '<div class="alert alert-danger">API Key नहीं डाली गई।</div>';
+        questionsDiv.innerHTML = '<div class="alert alert-danger">API Key नहीं डाली गई। पेज रिफ्रेश करके दोबारा ट्राई करें।</div>';
         btn.disabled = false;
         loading.style.display = 'none';
         return;
@@ -124,7 +125,10 @@
       let numQuestions = document.getElementById('numQuestions').value;
       if (numQuestions === 'custom') {
         numQuestions = parseInt(document.getElementById('customNum').value) || 10;
-        if (numQuestions < 10 || numQuestions > 100) numQuestions = 10;
+        if (numQuestions < 10 || numQuestions > 100) {
+          numQuestions = 10;
+          alert('10 से 100 तक चुनें, डिफॉल्ट 10 सेट किया गया');
+        }
       } else {
         numQuestions = parseInt(numQuestions);
       }
